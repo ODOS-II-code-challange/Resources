@@ -1,0 +1,57 @@
+version: '3.3'
+volumes:
+  opt-splunk-etc:
+  opt-splunk-var:
+
+services:
+  splunkenterprise:
+    #build: .
+    hostname: splunkenterprise
+    image: splunk/splunk:7.0.2
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_ENABLE_LISTEN: 9997
+      SPLUNK_ADD: tcp 1514
+    volumes:
+      - opt-splunk-etc:/opt/splunk/etc
+      - opt-splunk-var:/opt/splunk/var
+    ports:
+      - "8000:8000"
+      - "9997:9997"
+      - "8088:8088"
+      - "1514:1514"
+  db:
+      image: postgres
+      restart: always
+      networks:
+        - back
+      environment:
+        POSTGRES_USER: sonar
+        POSTGRES_PASSWORD: sonar
+      volumes:
+        - ${PWD}/dbdata:/var/lib/postgresql/data
+  sonar:
+      image: sonarqube
+      ports:
+        - 9000:9000
+        - 9092:9092
+      networks:
+        - front
+        - back
+      environment:
+        SONARQUBE_JDBC_USERNAME: sonar
+        SONARQUBE_JDBC_PASSWORD: sonar
+        SONARQUBE_JDBC_URL: jdbc:postgresql://db/sonar
+  nexus:
+      image: sonatype/nexus3
+      ports:
+        - 8081:8081
+        - 8443:8443
+      networks:
+        - front
+      volumes:
+        - ${PWD}/nexus-data:/nexus-data
+
+networks:
+  front:
+  back:

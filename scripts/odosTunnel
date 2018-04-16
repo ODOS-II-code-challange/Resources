@@ -1,0 +1,11 @@
+#!/bin/bash
+ssh -L 8080:localhost:8080 -L 9000:localhost:9000 -L 8081:localhost:8081 centos@odos.lassiterdynamics.com
+
+# odosTunnel
+# 8080: Jenkins
+# 9000: Sonar
+# 8081: Nexus
+
+# secTunnel
+# 18080: Fortify
+# 18081: Twistlock
