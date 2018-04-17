@@ -24,29 +24,49 @@ def slack(String msg){
 
 }
 
-def jHipsterBuild(){
-  sh './gradlew clean bootRepackage -Pprod --stacktrace'
+def jHipsterBuild(String baseDir='.'){
+  sh '${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace'
 }
 
-def sonarScan(Boolean break_build=false){
+def mavenBuild(String baseDir='.'){
+  sh '${baseDir}/mvnw -Pprod package'
+}
+
+def sonarScan(String baseDir='.', Boolean break_build=false){
   //TODO: build breaking
-  sh './gradlew sonarqube --stacktrace'
+  sh '${baseDir}/gradlew sonarqube --stacktrace'
 }
 
-def buildContainer(String containerName){
+def buildJHipsterContainer(String containerName, String baseDir='.'){
   withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'ODOS_PW', usernameVariable: 'ODOS_USER')]) {
       sh """
-        docker login -u ${ODOS_USER} -p ${ODOS_PW} docker.lassiterdynamics.com:5000
-        ./gradlew buildDocker
-        docker tag ${containerName}:latest docker.lassiterdynamics.com:5000/${containerName}:latest
-        docker tag docker.lassiterdynamics.com:5000/${containerName}:latest docker.lassiterdynamics.com:5000/${containerName}:${BUILD_ID}
+        docker login -u ${ODOS_USER} -p ${ODOS_PW} ${DOCKER_REGISTRY}
+        ${baseDir}/gradlew buildDocker
+        docker tag ${containerName}:latest ${DOCKER_REGISTRY}/${containerName}:latest
+        docker tag ${DOCKER_REGISTRY}/${containerName}:latest ${DOCKER_REGISTRY}/${containerName}:${BUILD_ID}
       """
   }
 }
 
+// backwards compatibility
+def buildContainer(String containerName){
+  buildJHipsterContainer(containerName)
+}
+
+def buildDockerContainer(String containerName, String opts="."){
+  withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'ODOS_PW', usernameVariable: 'ODOS_USER')]) {
+    sh """
+      docker login -u ${ODOS_USER} -p ${ODOS_PW} ${DOCKER_REGISTRY}
+      docker build -t ${containerName}:latest ${opts}
+      docker tag ${containerName}:latest ${DOCKER_REGISTRY}/${containerName}:latest
+      docker tag ${DOCKER_REGISTRY}/${containerName}:latest ${DOCKER_REGISTRY}/${containerName}:${BUILD_ID}
+    """
+  }
+}
+
 def pushContainer(String containerName){
-  sh "docker push docker.lassiterdynamics.com:5000/${containerName}:${BUILD_ID}"
-  sh "docker push docker.lassiterdynamics.com:5000/${containerName}:latest"
+  sh "docker push ${DOCKER_REGISTRY}/${containerName}:${BUILD_ID}"
+  sh "docker push ${DOCKER_REGISTRY}/${containerName}:latest"
 }
 
 def twistlock(String repo,String image,String tag){
@@ -88,7 +108,7 @@ def deployToOpenShift(String environment, String image, String tag){
     oc project ${environment}
 
     oc import-image ${image} \
-      --from='docker.lassiterdynamics.com:5000/${image}:${tag}' \
+      --from='${DOCKER_REGISTRY}/${image}:${tag}' \
       --confirm
     """
   }
@@ -140,7 +160,7 @@ def fortify(srcDir,reportDir, appID=0){
       """
     }
   }
-  
+
   archiveArtifacts allowEmptyArchive: true, artifacts: '${reportDir}/*', fingerprint: true
 }
 

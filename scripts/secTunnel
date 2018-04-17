@@ -1,5 +1,5 @@
 #!/bin/bash
-ssh -L 18080:localhost:8080 -L 18081:localhost:8081 centos@security.lassiterdynamics.com
+ssh -p 10022 -L 18080:localhost:8080 -L 18081:localhost:8081 centos@security.lassiterdynamics.com
 
 # odosTunnel
 # 8080: Jenkins
