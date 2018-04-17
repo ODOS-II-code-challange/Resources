@@ -25,16 +25,16 @@ def slack(String msg){
 }
 
 def jHipsterBuild(String baseDir='.'){
-  sh '${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace'
+  sh "${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace"
 }
 
 def mavenBuild(String baseDir='.'){
-  sh '${baseDir}/mvnw -Pprod package'
+  sh "${baseDir}/mvnw -Pprod package"
 }
 
 def sonarScan(String baseDir='.', Boolean break_build=false){
   //TODO: build breaking
-  sh '${baseDir}/gradlew sonarqube --stacktrace'
+  sh "${baseDir}/gradlew sonarqube --stacktrace"
 }
 
 def buildJHipsterContainer(String containerName, String baseDir='.'){
