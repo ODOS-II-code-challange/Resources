@@ -34,7 +34,7 @@ def mavenBuild(String baseDir='.'){
 
 def sonarScan(String baseDir='.', Boolean break_build=false){
   //TODO: build breaking
-  sh "${baseDir}/gradlew sonarqube --stacktrace -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabasePassword=${TEST_DB_PASS}"
+  sh "${baseDir}/gradlew sonarqube --stacktrace -PdatabaseHost=${TEST_DB_HOST}"
 }
 
 def buildJHipsterContainer(String containerName, String baseDir='.'){
