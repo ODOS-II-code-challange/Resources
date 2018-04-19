@@ -25,7 +25,11 @@ def slack(String msg){
 }
 
 def jHipsterBuild(String baseDir='.'){
-  sh "${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace"
+  s  withCredentials([usernamePassword(credentialsId: 'TEST_DB_USER_PASS', passwordVariable: 'TEST_DB_PASS', usernameVariable: 'TEST_DB_USER')]) {
+     sh """
+	 	${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabaseAppPassword=${TEST_DB_PASS} -PdatabasePassword=${TEST_DB_PASS}
+	 """
+     }
 }
 
 def mavenBuild(String baseDir='.'){
@@ -34,7 +38,11 @@ def mavenBuild(String baseDir='.'){
 
 def sonarScan(String baseDir='.', Boolean break_build=false){
   //TODO: build breaking
-  sh "${baseDir}/gradlew sonarqube --stacktrace -PdatabaseHost=${TEST_DB_HOST}"
+  withCredentials([usernamePassword(credentialsId: 'TEST_DB_USER_PASS', passwordVariable: 'TEST_DB_PASS', usernameVariable: 'TEST_DB_USER')]) {
+ 	 sh """
+   		${baseDir}/gradlew sonarqube -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabaseAppPassword=${TEST_DB_PASS} --stacktrace
+     	"""
+  	}
 }
 
 def buildJHipsterContainer(String containerName, String baseDir='.'){
