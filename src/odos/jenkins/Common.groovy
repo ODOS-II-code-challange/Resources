@@ -25,7 +25,7 @@ def slack(String msg){
 }
 
 def jHipsterBuild(String baseDir='.'){
-  s  withCredentials([usernamePassword(credentialsId: 'TEST_DB_USER_PASS', passwordVariable: 'TEST_DB_PASS', usernameVariable: 'TEST_DB_USER')]) {
+  withCredentials([usernamePassword(credentialsId: 'TEST_DB_USER_PASS', passwordVariable: 'TEST_DB_PASS', usernameVariable: 'TEST_DB_USER')]) {
      sh """
 	 	${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabaseAppPassword=${TEST_DB_PASS} -PdatabasePassword=${TEST_DB_PASS}
 	 """
