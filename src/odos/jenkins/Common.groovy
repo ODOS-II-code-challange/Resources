@@ -21,19 +21,18 @@ def runGitPush(git_branch){
 def slack(String msg){
   echo msg
   slackSend botUser: true, message: "${JOB_NAME}#${BUILD_ID}: ${msg}", tokenCredentialId: 'slack'
-
 }
 
-def jHipsterBuild(String baseDir='.'){
+def jHipsterBuild(String baseDir='.', String opts='-Pprod'){
   withCredentials([usernamePassword(credentialsId: 'TEST_DB_USER_PASS', passwordVariable: 'TEST_DB_PASS', usernameVariable: 'TEST_DB_USER')]) {
      sh """
-	 	${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabaseAppPassword=${TEST_DB_PASS} -PdatabasePassword=${TEST_DB_PASS}
+	 	${baseDir}/gradlew clean bootRepackage ${opts} --stacktrace -PdatabaseHost=${TEST_DB_HOST} -PdatabaseAdmin=${TEST_DB_USER} -PdatabaseAppPassword=${TEST_DB_PASS} -PdatabasePassword=${TEST_DB_PASS}
 	 """
      }
 }
 
-def mavenBuild(String baseDir='.'){
-  sh "${baseDir}/mvnw -Pprod package"
+def mavenBuild(String baseDir='.', String opts='-Pprod'){
+  sh "${baseDir}/mvnw ${opts} package"
 }
 
 def sonarScan(String baseDir='.', Boolean break_build=false){
