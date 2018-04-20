@@ -1,0 +1,30 @@
+version: '3.3'
+# AWS deploy for testing
+
+services:
+  eureka:
+    image: crrsmsreg:latest
+    restart: always
+    networks:
+      - back
+  crr_svc:
+      image: docker.lassiterdynamics.com:5000/crrsvc:latest
+      ports:
+        - 8181:8181
+      networks:
+        - front
+        - back
+      env_file: env
+
+  crr_ui:
+      image: docker.lassiterdynamics.com:5000/odos_crrs_ui:latest
+      ports:
+        - 8080:8080
+      networks:
+        - front
+        - back
+      env_file: env
+
+networks:
+  front:
+  back:
