@@ -21,15 +21,14 @@ def runGitPush(git_branch){
 def slack(String msg){
   echo msg
   slackSend botUser: true, message: "${JOB_NAME}#${BUILD_ID}: ${msg}", tokenCredentialId: 'slack'
-
 }
 
-def jHipsterBuild(String baseDir='.'){
-  sh "${baseDir}/gradlew clean bootRepackage -Pprod --stacktrace"
+def jHipsterBuild(String baseDir='.', String opts='-Pprod'){
+  sh "${baseDir}/gradlew clean bootRepackage ${opts} --stacktrace"
 }
 
-def mavenBuild(String baseDir='.'){
-  sh "${baseDir}/mvnw -Pprod package"
+def mavenBuild(String baseDir='.', String opts='-Pprod'){
+  sh "${baseDir}/mvnw ${opts} package"
 }
 
 def sonarScan(String baseDir='.', Boolean break_build=false){
